@@ -6,13 +6,13 @@
 int main()
 {
     sf::RenderWindow window(
-        sf::VideoMode({640, 720}),
+        sf::VideoMode({1000, 760}),
         "Sliding Number Puzzle");
 
     Matrix board;
     int moveCount = 0;
     AstarSolver solver;
-    std::string hintMessage = "Press H for a hint";
+    std::string hintMessage = "";
 
     std::vector<Direction> solutionMoves;
     int solutionIndex = 0;
@@ -24,6 +24,9 @@ int main()
         return 1;
     window.setFramerateLimit(60);
 
+    sf::View gameView(sf::FloatRect({0.f, 0.f}, {1000.f, 760.f}));
+    window.setView(gameView);
+
     while (window.isOpen())
     {
         while (const std::optional event = window.pollEvent())
@@ -31,6 +34,36 @@ int main()
             if (event->is<sf::Event::Closed>())
                 window.close();
 
+
+            if (const auto* resized = event->getIf<sf::Event::Resized>())
+            {
+                if (resized->size.x > 0 && resized->size.y > 0)
+                {
+                    constexpr float designWidth = 1000.f;
+                    constexpr float designHeight = 760.f;
+
+                    const float windowWidth = static_cast<float>(resized->size.x);
+                    const float windowHeight = static_cast<float>(resized->size.y);
+                    const float windowRatio = windowWidth / windowHeight;
+                    const float designRatio = designWidth / designHeight;
+
+                    sf::FloatRect viewport({0.f, 0.f}, {1.f, 1.f});
+
+                    if (windowRatio > designRatio)
+                    {
+                        viewport.size.x = designRatio / windowRatio;
+                        viewport.position.x = (1.f - viewport.size.x) / 2.f;
+                    }
+                    else
+                    {
+                        viewport.size.y = windowRatio / designRatio;
+                        viewport.position.y = (1.f - viewport.size.y) / 2.f;
+                    }
+
+                    gameView.setViewport(viewport);
+                    window.setView(gameView);
+                }
+            }
             
             if (const auto* key = event->getIf<sf::Event::KeyPressed>())
             {
@@ -140,12 +173,21 @@ int main()
         if (board.won())    hintMessage = "Puzzle solved!"
         ;
         window.clear(sf::Color(25, 29, 39));
+
+        sf::RectangleShape infoPanel({400.f, 700.f});
+        infoPanel.setPosition({20.f, 30.f});
+        infoPanel.setFillColor(sf::Color(34, 40, 54));
+        infoPanel.setOutlineThickness(1.f);
+        infoPanel.setOutlineColor(sf::Color(65, 78, 100));
+        window.draw(infoPanel);
+
+
         for (int row = 0; row < 4; ++row)
         {
             for (int col = 0; col < 4; ++col)
             {
                 const int value = board.getTile(row, col);
-                const float x = 85.f + col * 120.f;
+                const float x = 480.f + col * 120.f;
                 const float y = 125.f + row * 120.f;
 
                 sf::RectangleShape tile({110.f, 110.f});
@@ -173,20 +215,20 @@ int main()
             }
         }
 
-        sf::Text movesText(font, "Moves: " + std::to_string(moveCount), 24);
-        movesText.setPosition({250.f, 45.f});
+        sf::Text movesText(font, "Moves: " + std::to_string(moveCount), 26);
+        movesText.setPosition({40.f, 80.f});
         movesText.setFillColor(sf::Color::White);
         window.draw(movesText);
-        sf::Text hintText(font, hintMessage, 20);
-        hintText.setPosition({190.f, 85.f});
+        sf::Text hintText(font, hintMessage, 22);
+        hintText.setPosition({40.f, 135.f});
         hintText.setFillColor(sf::Color::White);
         window.draw(hintText);
 
         sf::Text controlsText(
-                        font,
-                        "Arrows/W A S D :- move   H :- hint\n\nEnter :- solve       R :- restart",
-                        16);
-        controlsText.setPosition({85.f, 605.f});
+                    font,
+                    "CONTROLS\n\n\n- Move: Arrows / WASD\n\n- Hint: H\n\n- Solve: Enter\n\n- Restart: R",
+                    22);
+        controlsText.setPosition({40.f, 250.f});
         controlsText.setFillColor(sf::Color(190, 200, 215));
         window.draw(controlsText);
 

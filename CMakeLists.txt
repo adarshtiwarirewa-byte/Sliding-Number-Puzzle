@@ -8,6 +8,12 @@ add_executable(SlidingNumberGame
 
 target_compile_features(SlidingNumberGame PRIVATE cxx_std_17)
 
+add_executable(SlidingNumberPuzzleConsole
+    NumberSlideGame.cpp
+)
+
+target_compile_features(SlidingNumberPuzzleConsole PRIVATE cxx_std_17)
+
 include(FetchContent)
 
 FetchContent_Declare(

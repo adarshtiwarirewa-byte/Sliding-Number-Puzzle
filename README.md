@@ -15,6 +15,16 @@ cmake --build build
 .\build\SlidingNumberGame.exe
 ```
 
+### Console version
+
+After the configure step above, build and run the console game:
+
+```powershell
+cmake --build build --target SlidingNumberPuzzleConsole
+.\build\SlidingNumberPuzzleConsole.exe
+```
+
+
 
 ## Controls
 
